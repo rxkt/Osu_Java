@@ -1,0 +1,35 @@
+##input 2 pound signs before each line to input comment as a line
+##format is as follows:
+##
+##song file name
+##Type1: C for circle
+##X coord (in relation to java GUI)
+##Y Coord
+##Executed time (Starting from 0)
+##Order number
+##Type 2: S for spiiner
+##????Array of all coordinates in here
+##Executed time
+##Order number
+##Type 3: O for Spinner
+##Executed time
+##end song in file by simply having "end" as input
+##
+##the following is a test!!! lol
+Tokohanaby  Nagi Yanagi.mp3
+C
+500
+500
+2
+1
+C
+550
+500
+2.25
+2
+C
+600
+500
+2.5
+3
+end
