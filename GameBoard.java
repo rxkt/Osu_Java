@@ -29,8 +29,11 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     private List<Circle> circles;
     private List<ApproachCircle> approachCircles;
     private List<Slider> sliders;
+    //unite all circles and sliders into 1 list<object>
     private Window w;
+    private String songPath;
     private MP3 song;
+    private String videoPath;
     private Playback v;
     //might replace playback with a videoworker that accepts the dir.
     private VideoWorker vw;
@@ -63,7 +66,13 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	    exception.printStackTrace();
 	}
 	//open the stupid multimedia files here//
-	song = new MP3(dir+nextLine);
+	//test.txt must follow the format, otherwise it crashes on you
+	if (nextLine.equals("song")){
+	    songPath=mapInput.nextLine();
+	}else{
+	    throw new RuntimeException();
+	}
+	song = new MP3(dir+songPath);
 	//load all images into memory	
 	approachCircle = new ImageIcon("approachCircle.png").getImage();
 	lastHitTime=0;
@@ -71,7 +80,21 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	sliders = new ArrayList<Slider>();
 	approachCircles = new ArrayList<ApproachCircle>();
 
-
+	nextLine = mapInput.nextLine();
+	System.out.println(nextLine);
+	if (nextLine.equals("video")){
+	    videoPath=mapInput.nextLine();
+	    nextLine=mapInput.nextLine();
+	    // ^^^^to align both cases
+	    //of having both video and no video
+	}
+	//else{
+	//    there is no video. assume the next line is the beginning
+	//    of a new note.
+	
+	//here begins the test.txt file reading.
+	//
+	System.out.println(nextLine);
 
 	timer = new Timer(20,this);
 	timer.start();
@@ -82,7 +105,6 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     }
     public void streamMedia(){
 	t1 = new Thread(song);
-	nextLine = mapInput.nextLine();
 	//vvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 	//v = new Playback(dir,nextLine);
 	//add(v);
@@ -92,7 +114,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	   different thread handle:
 	   >>add a videoworker to each GameBoard as a var
 	*/
-	vw = new VideoWorker(this,dir,nextLine);
+	vw = new VideoWorker(this,dir,videoPath);
 	add(vw.p);
 	vw.execute();
 	/////////////////comment out stuff inbetween these with VideoWorker
