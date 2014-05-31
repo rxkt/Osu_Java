@@ -2,7 +2,8 @@
 ##format is as follows:
 ##
 ##song file name
-##Type1: 0 for circle, 1 for slider, 2 for spinners.
+##Type1: C for circle, S for slider, O for spinner.
+##(incase the letter comparisions lag the beginning, use numbers)
 ##X coord (in relation to java GUI)
 ##Y Coord
 ##Executed time (Starting from 0)
@@ -21,16 +22,16 @@ Black Bullet - Ending.avi
 C
 500
 500
-2
+5
 1
 C
 550
 500
-2.25
+6.25
 2
 C
 600
 500
-2.5
+7.5
 3
 end

@@ -11,5 +11,6 @@ public abstract class PrintableObject{
     protected int x,y,orderNum;
     //the time that this will appear on screen
     protected double time;
+    protected float transparency=0f;
     //approachCircle,
 }
