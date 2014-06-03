@@ -12,5 +12,7 @@ public abstract class PrintableObject{
     //the time that this will appear on screen
     protected double time;
     protected float transparency=0f;
-    //approachCircle,
+    protected int circleSize,aCircleSize;
+    //aCircleSize = approach circle's size.
+    
 }

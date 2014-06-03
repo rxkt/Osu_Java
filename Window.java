@@ -29,8 +29,8 @@ public class Window extends JFrame{
 	setResizable(true);
 	setVisible(true);
     }
-    public void addPanel(String dir, String source){
-	current = new GameBoard(dir,source);
+    public void addPanel(String dir, String source,int circleSize){
+	current = new GameBoard(dir,source,circleSize);
 	current.setFrame(this);
 
 	add(current);
@@ -46,7 +46,7 @@ public class Window extends JFrame{
     }
     public static void main(String[] args){
 	Window w= new Window();
-	w.addPanel("yanaginagi-Tokohana/","test.txt");
+	w.addPanel("yanaginagi-Tokohana/","test.txt",70);
 	//w.pack();
     }
 }

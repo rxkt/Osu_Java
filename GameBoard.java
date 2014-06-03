@@ -20,6 +20,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     //game mechanics vars
     protected boolean mouseDown,mouseClicked,key1down,key2down;
     protected int combo,score;
+    protected int circleSize;//the size of each note.
     //----create boolean to prevent repeated inputs with 1 input
     protected boolean key1used,key2used;
     protected int mouseX, mouseY;
@@ -27,7 +28,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     protected Image approachCircle;
     protected Image hitCircle;
     protected List<ApproachCircle> approachCircles;
-    protected List objects;
+    protected List<PrintableObject> objects;
     //unite all circles and sliders into 1 list<object>
     protected Window w;
     protected String songPath;
@@ -39,10 +40,10 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     protected Thread t1;
 
 
-    public GameBoard(String dir,String filename){
+    public GameBoard(String dir,String filename,int circleSize){
 	//set up component, might need more
 	nextLine="";
-	setFocusable(true);
+     	setFocusable(true);
 	setVisible(true);
 	setBackground(Color.BLACK);
 	this.dir=dir;
@@ -75,6 +76,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	approachCircle = new ImageIcon(dir+"approachCircle.png").getImage();
 	hitCircle = new ImageIcon(dir+"hitcircle.png").getImage();
 	lastHitTime=0;
+	this.circleSize = circleSize;
 	approachCircles = new ArrayList<ApproachCircle>();
 	objects=new ArrayList();
         nextLine = mapInput.nextLine();
@@ -113,7 +115,8 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	t1.start();
 	repaint();
 	revalidate();
-	startTime = System.currentTimeMillis()/1000;
+	startTime = System.currentTimeMillis()/1000.0;
+	System.out.println(startTime);
     }
     public void setFrame(Window w){
 	this.w = w;
@@ -128,14 +131,23 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	    g2d.drawImage(approachCircle,a.getX(),a.getY(),a.getDiameter(),a.getDiameter(),this);
 	}
 	if (startTime > 0){
-	    for (Object o:objects){
-		if (startTime+((PrintableObject)o).time>currentTime+5)
-		    break;//ignore the beats too far ahead in the future.
-		if (o instanceof Circle){
-		    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,((Circle)o).transparency));
-		    g2d.drawImage(hitCircle,((Circle)o).x,((Circle)o).y,50,50,this);
+	    for (PrintableObject o:objects){
+		
+		if (startTime+o.time>currentTime+5){
+		    break;
 		}
+		if (o instanceof Circle){
+		    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,o.transparency));
+		    g2d.drawImage(hitCircle,o.x-circleSize/2,
+				  o.y-circleSize/2,
+				  circleSize,circleSize,this);
+		}
+		g2d.drawImage(approachCircle,o.x-o.aCircleSize/2,
+			    o.y-o.aCircleSize/2,
+			    o.aCircleSize,o.aCircleSize,this);
+		
 		//also draw for sliders lol
+		
 	    }
 	}
 	Toolkit.getDefaultToolkit().sync();
@@ -176,17 +188,29 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	}
 	if (startTime>0){//if the game has commenced
 	    for (int i=0;i<objects.size();i++){
-		PrintableObject o = (PrintableObject)objects.get(i);
-		currentTime = System.currentTimeMillis()/1000;
-		if (startTime+o.time>currentTime+5)
+		PrintableObject o = objects.get(i);
+		currentTime = System.currentTimeMillis()/1000.0;
+		if (startTime+o.time>currentTime+5){
 		    break;//ignore the beats too far ahead in the future.
-		if (o.transparency<0.995 && currentTime-startTime < o.time){
-		    o.transparency+=0.02;
-		}else if(currentTime-startTime > o.time +0.25){
-		    //.25 seconds after you missed it...
+		}
+		if ( currentTime-startTime < o.time
+		    && o.time+startTime-currentTime<1){
+		    if (o.transparency<0.9)
+			o.transparency+=0.10;
+		    //aCircleSize sketchy.
+		    o.aCircleSize=(int)(150*((startTime+o.time-currentTime))+circleSize);
+		}else if(currentTime+0.25 > startTime+o.time){
+		    
+		    //.25 seconds after you MISSED it...
 		    objects.remove(o);
 		    //insert X image lol
 		}
+		//if the circle is completely painted
+		//we want to start shrinking the approach circle size.
+		//x = k-kt x =k @ t=0 and x=0 @ t=1
+		//or x = k(c-t) where k is the shrink constant
+		//and c is the time of shrinking.
+	        
 	    }
 	}
 	    

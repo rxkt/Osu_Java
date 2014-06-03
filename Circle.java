@@ -14,6 +14,7 @@ public class Circle extends PrintableObject{
 	this.y=y;
         this.orderNum = orderNum;
 	this.time=time;
+	aCircleSize=150;
     }
     //ALL GET METHODS ARE USELESS WITH PROTECTED
     
