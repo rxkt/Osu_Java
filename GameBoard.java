@@ -157,20 +157,18 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 		g2d.drawImage(approachCircle,o.x-o.aCircleSize/2,
 			    o.y-o.aCircleSize/2,
 			    o.aCircleSize,o.aCircleSize,this);
-		
 		//also draw for sliders lol
-		
 	    }
 	    for (HitNum h:hitNums){
 		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,h.transparency));
 		if (h.score==300){
-		    g2d.drawImage(hit300,h.x-50,h.y-30,this);
+		    g2d.drawImage(hit300,h.x-25,h.y-15,70,45,this);
 		}else if (h.score==100){
-		    g2d.drawImage(hit100,h.x-50,h.y-30,this);
+		    g2d.drawImage(hit100,h.x-25,h.y-15,70,45,this);
 		}else if (h.score==50){
-		    g2d.drawImage(hit50,h.x-50,h.y-30,this);
+		    g2d.drawImage(hit50,h.x-25,h.y-15,70,45,this);
 		}else if (h.score==0){
-		    g2d.drawImage(hit0,h.x-50,h.y-30,this);
+		    g2d.drawImage(hit0,h.x-25,h.y-15,50,45,this);
 		}
 	    }
 	}
@@ -190,13 +188,13 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	    if (objects.size() > 0){
 		PrintableObject o = objects.get(0);
 		if (o.aCircleSize<100){
-		    if ((o.aCircleSize-70)/70 < .1){
+		    if ((o.aCircleSize-70)/70 < .06){
 			objects.remove(o);
 			hitNums.add(new HitNum(o.x,o.y,300));
-		    }else if ((o.aCircleSize-70)/70 < .2){
+		    }else if ((o.aCircleSize-70)/70 < .12){
 			objects.remove(o);
 			hitNums.add(new HitNum(o.x,o.y,100));
-		    }else if ((o.aCircleSize-70)/70 < .3){
+		    }else if ((o.aCircleSize-70)/70 < .18){
 			objects.remove(o);
 			hitNums.add(new HitNum(o.x,o.y,50));
 		    }
@@ -263,7 +261,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 		if (startTime+o.time>currentTime+5){
 		    break;//ignore the beats too far ahead in the future.
 		}
-		if ( currentTime-startTime < o.time
+		if (currentTime-startTime < o.time
 		    && o.time+startTime-currentTime<1){
 		    if (o.transparency<0.9)
 			o.transparency+=0.10;
@@ -275,6 +273,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 		    //.25 seconds after you MISSED it...
 		    objects.remove(o);
 		    //insert X image lol
+		    hitNums.add(new HitNum(o.x,o.y,0));
 		}
 	        
 	    }
