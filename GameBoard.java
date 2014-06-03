@@ -27,8 +27,11 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     //printable objects
     protected Image approachCircle;
     protected Image hitCircle;
+    protected Image hit300,hit300g,hit300k,hit100,hit100k,hit50,hit0;
+	
     protected List<ApproachCircle> approachCircles;
     protected List<PrintableObject> objects;
+    protected List<HitNum> hitNums;
     //unite all circles and sliders into 1 list<object>
     protected Window w;
     protected String songPath;
@@ -75,10 +78,19 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	//load all images into memory	
 	approachCircle = new ImageIcon(dir+"approachCircle.png").getImage();
 	hitCircle = new ImageIcon(dir+"hitcircle.png").getImage();
+	hit300 = new ImageIcon(dir+"hit300.png").getImage();
+	hit300g= new ImageIcon(dir+"hit300g.png").getImage();
+	hit300k= new ImageIcon(dir+"hit300k.png").getImage();
+	hit100= new ImageIcon(dir+"hit100.png").getImage();
+	hit100k= new ImageIcon(dir+"hit100k.png").getImage();
+	hit50= new ImageIcon(dir+"hit50.png").getImage();
+	hit0= new ImageIcon(dir+"hit0.png").getImage();
+
 	lastHitTime=0;
 	this.circleSize = circleSize;
 	approachCircles = new ArrayList<ApproachCircle>();
-	objects=new ArrayList();
+	objects=new ArrayList<PrintableObject>();
+	hitNums = new ArrayList<HitNum>();
         nextLine = mapInput.nextLine();
 	if (nextLine.equals("video")){
 	    videoPath=mapInput.nextLine();
@@ -149,35 +161,93 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 		//also draw for sliders lol
 		
 	    }
+	    for (HitNum h:hitNums){
+		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,h.transparency));
+		if (h.score==300){
+		    g2d.drawImage(hit300,h.x-50,h.y-30,this);
+		}else if (h.score==100){
+		    g2d.drawImage(hit100,h.x-50,h.y-30,this);
+		}else if (h.score==50){
+		    g2d.drawImage(hit50,h.x-50,h.y-30,this);
+		}else if (h.score==0){
+		    g2d.drawImage(hit0,h.x-50,h.y-30,this);
+		}
+	    }
 	}
 	Toolkit.getDefaultToolkit().sync();
 	g.dispose();
     }
     public void actionPerformed(ActionEvent e){
 	repaint();
-	time+=0.02;//may replace with systemTime
+	time+=0.02;
 	//under click->true,set currentTime. if start+o.time>current+5 break
 	//compare the x,y of the FIRST OBJECT, as well as timing.
-	///////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////
 	////////////////////////YOU WERE LAST HERE ERIC////////
 	if (mouseClicked){
 	    mouseClicked=false;
 	    approachCircles.add(new ApproachCircle(mouseX,mouseY));
-	}
+	    //check first element objects here
+	    if (objects.size() > 0){
+		PrintableObject o = objects.get(0);
+		if (o.aCircleSize<100){
+		    if ((o.aCircleSize-70)/70 < .1){
+			objects.remove(o);
+			hitNums.add(new HitNum(o.x,o.y,300));
+		    }else if ((o.aCircleSize-70)/70 < .2){
+			objects.remove(o);
+			hitNums.add(new HitNum(o.x,o.y,100));
+		    }else if ((o.aCircleSize-70)/70 < .3){
+			objects.remove(o);
+			hitNums.add(new HitNum(o.x,o.y,50));
+		    }
+		}
+	    }
+	}/////////////check key1
 	if (key1down && key1used==false){
 	    approachCircles.add(new ApproachCircle(mouseX,mouseY));
 	    key1used=true;
+	    //check first element here
+	    if (objects.size() > 0){
+	        PrintableObject o = objects.get(0);
+		if (o.aCircleSize<100){
+		    if ((o.aCircleSize-70)/70 < .1){
+			objects.remove(o);
+			hitNums.add(new HitNum(o.x,o.y,300));
+		    }else if ((o.aCircleSize-70)/70 < .2){
+			objects.remove(o);
+			hitNums.add(new HitNum(o.x,o.y,100));
+		    }else if ((o.aCircleSize-70)/70 < .3){
+			objects.remove(o);
+			hitNums.add(new HitNum(o.x,o.y,50));
+		    }
+		}
+	    }
 	}else if(key1used && !key1down){
 	    key1used=false;
-	}
+	}//////////////check key2
 	if (key2down && key2used==false){
 	    approachCircles.add(new ApproachCircle(mouseX,mouseY));
 	    key2used=true;
+	    //check first element here
+	    if (objects.size() > 0){
+	        PrintableObject o = objects.get(0);
+		if (o.aCircleSize<100){
+		    if ((o.aCircleSize-70)/70 < .1){
+			objects.remove(o);
+			hitNums.add(new HitNum(o.x,o.y,300));
+		    }else if ((o.aCircleSize-70)/70 < .2){
+			objects.remove(o);
+			hitNums.add(new HitNum(o.x,o.y,100));
+		    }else if ((o.aCircleSize-70)/70 < .3){
+			objects.remove(o);
+			hitNums.add(new HitNum(o.x,o.y,50));
+		    }
+		}
+	    }
 	}else if(key2used && !key2down){
 	    key2used=false;
 	}
-
+	
 	//do game actions here//
 	for (int i =0;i<approachCircles.size();i++){
 	    ApproachCircle a = approachCircles.get(i);
@@ -197,20 +267,23 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 		    && o.time+startTime-currentTime<1){
 		    if (o.transparency<0.9)
 			o.transparency+=0.10;
-		    //aCircleSize sketchy.
+		    //x = k-kt x =k @ t=0 and x=0 @ t=1
+		    //or x = k(c-t) where k is the shrink constant
+		    //and c is the time of shrinking.
 		    o.aCircleSize=(int)(150*((startTime+o.time-currentTime))+circleSize);
 		}else if(currentTime+0.25 > startTime+o.time){
-		    
 		    //.25 seconds after you MISSED it...
 		    objects.remove(o);
 		    //insert X image lol
 		}
-		//if the circle is completely painted
-		//we want to start shrinking the approach circle size.
-		//x = k-kt x =k @ t=0 and x=0 @ t=1
-		//or x = k(c-t) where k is the shrink constant
-		//and c is the time of shrinking.
 	        
+	    }
+	    for (int i=0;i<hitNums.size();i++){
+		HitNum h = hitNums.get(i);
+		h.transparency-=0.02;
+		if (h.transparency < 0.04){
+		    hitNums.remove(h);
+		}
 	    }
 	}
 	    
