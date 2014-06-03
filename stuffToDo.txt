@@ -4,8 +4,6 @@ And some explanations in case eric forgets stuff.
 **keep all the goals in order. time management/work efficiency important.
 
 ______game mechanics_________________________________________________________________________
-implement approach circle to every printableObject. have the approachCircle size + rate in printableObject.
-
 implement interactions with the circle. only read the first object of the (List objects).
 
 utilize approach rate + approach circle dimensions to remove circles and judge score, rather than time (ty erc kolbuzsc)
