@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Scanner;//scan files beatmap files
 import java.util.concurrent.*;//for cyclic barrier
 import java.io.*;
-
+import javax.sound.sampled.*;
 
 public class GameBoard extends JPanel implements ActionListener,MouseMotionListener{
     protected double systemTime;//update every action performed, remove timer1
@@ -19,6 +19,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     protected String nextLine;
     //game mechanics vars
     protected boolean mouseDown,mouseClicked,key1down,key2down;
+    protected double error;//the offset of clicking a note
     protected int combo,score;
     protected int circleSize;//the size of each note.
     //----create boolean to prevent repeated inputs with 1 input
@@ -57,6 +58,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	addMouseMotionListener(this);
 	//open the scanned file
 	try{
+	    //start up scanner
             mapInput = new Scanner(new File(dir + filename));
 	    while (mapInput.hasNext()){
 		nextLine = mapInput.nextLine();
@@ -67,6 +69,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	}catch(FileNotFoundException exception){
 	    exception.printStackTrace();
 	}
+	
 	//open the stupid multimedia files here//
 	//test.txt must follow the format, otherwise it crashes on you
 	if (nextLine.equals("song")){
@@ -175,6 +178,37 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	Toolkit.getDefaultToolkit().sync();
 	g.dispose();
     }
+    public void hitNote(PrintableObject o){
+	error = Math.abs(o.aCircleSize-70)/70.0;
+	if (o.aCircleSize<150){
+	    if (Math.pow(mouseX-o.x,2)+Math.pow(mouseY-o.y,2) < 4900 && error < .15){
+		objects.remove(o);
+		hitNums.add(new HitNum(o.x,o.y,300));
+		playHit();
+	    }else if (Math.pow(mouseX-o.x,2)+Math.pow(mouseY-o.y,2) < 6400){
+		if (error < .4){
+		    objects.remove(o);
+		    hitNums.add(new HitNum(o.x,o.y,100));
+		    playHit();
+		}else if (error < .8){
+		    objects.remove(o);
+		    hitNums.add(new HitNum(o.x,o.y,50));
+		    playHit();
+		}
+	    }
+	}
+    }
+    public void playHit(){
+	try{
+	    Clip hitnormal;
+	    hitnormal= AudioSystem.getClip();
+	    hitnormal.open(AudioSystem.getAudioInputStream(new File(dir+"hitnormal.wav")));
+	    hitnormal.start();
+	}catch(Exception e){
+	    e.printStackTrace();
+	    
+	}
+    }
     public void actionPerformed(ActionEvent e){
 	repaint();
 	time+=0.02;
@@ -187,18 +221,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	    //check first element objects here
 	    if (objects.size() > 0){
 		PrintableObject o = objects.get(0);
-		if (o.aCircleSize<100){
-		    if ((o.aCircleSize-70)/70 < .06){
-			objects.remove(o);
-			hitNums.add(new HitNum(o.x,o.y,300));
-		    }else if ((o.aCircleSize-70)/70 < .12){
-			objects.remove(o);
-			hitNums.add(new HitNum(o.x,o.y,100));
-		    }else if ((o.aCircleSize-70)/70 < .18){
-			objects.remove(o);
-			hitNums.add(new HitNum(o.x,o.y,50));
-		    }
-		}
+		hitNote(o);
 	    }
 	}/////////////check key1
 	if (key1down && key1used==false){
@@ -207,18 +230,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	    //check first element here
 	    if (objects.size() > 0){
 	        PrintableObject o = objects.get(0);
-		if (o.aCircleSize<100){
-		    if ((o.aCircleSize-70)/70 < .1){
-			objects.remove(o);
-			hitNums.add(new HitNum(o.x,o.y,300));
-		    }else if ((o.aCircleSize-70)/70 < .2){
-			objects.remove(o);
-			hitNums.add(new HitNum(o.x,o.y,100));
-		    }else if ((o.aCircleSize-70)/70 < .3){
-			objects.remove(o);
-			hitNums.add(new HitNum(o.x,o.y,50));
-		    }
-		}
+	        hitNote(o);
 	    }
 	}else if(key1used && !key1down){
 	    key1used=false;
@@ -229,18 +241,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	    //check first element here
 	    if (objects.size() > 0){
 	        PrintableObject o = objects.get(0);
-		if (o.aCircleSize<100){
-		    if ((o.aCircleSize-70)/70 < .1){
-			objects.remove(o);
-			hitNums.add(new HitNum(o.x,o.y,300));
-		    }else if ((o.aCircleSize-70)/70 < .2){
-			objects.remove(o);
-			hitNums.add(new HitNum(o.x,o.y,100));
-		    }else if ((o.aCircleSize-70)/70 < .3){
-			objects.remove(o);
-			hitNums.add(new HitNum(o.x,o.y,50));
-		    }
-		}
+		hitNote(o);
 	    }
 	}else if(key2used && !key2down){
 	    key2used=false;

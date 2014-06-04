@@ -46,7 +46,7 @@ public class Window extends JFrame{
     }
     public static void main(String[] args){
 	Window w= new Window();
-	w.addPanel("yanaginagi-Tokohana/","test.txt",70);
-	//w.pack();
+	w.addPanel("songs/yanaginagi-Tokohana/","test.txt",70);
+	//change songs to a search using java file doc
     }
 }
