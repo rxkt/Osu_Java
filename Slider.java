@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
-//http://en.wikipedia.org/wiki/B%C3%A9zier_curve for osu sliders.
-//consider using list instead of arrayList
 public class Slider extends PrintableObject{
-    //arraylist of key points for the slider
-    
+    protected Point target;
     //points used for be'zier curve
     protected List<Point> points;
     protected List<Point> pathOfPoints;

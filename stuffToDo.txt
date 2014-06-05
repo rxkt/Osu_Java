@@ -6,8 +6,8 @@ And some explanations in case eric forgets stuff.
 ______game mechanics________________________________________________________________________
 
 !!as time runs out, create the title screen now as well as the song selection screen.
-move all songs into a /songs/ dir file and change it in Window.java.
-Read up on java documentation for reading directories
+
+-->Read up on java documentation for reading directories
 
 //may leave out//change sizes of circle + approach rate, specify + put them into gameBoard.java
 
