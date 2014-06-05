@@ -107,15 +107,36 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	//here begins the test.txt file reading.
 	while (!nextLine.equals("end")){
 	    if (nextLine.equals("C")){
-		String s = mapInput.nextLine();
-		int x=Integer.parseInt(s);
+		int x=Integer.parseInt(mapInput.nextLine());
 		int y=Integer.parseInt(mapInput.nextLine());
 		double time=Double.parseDouble(mapInput.nextLine());
 		int orderNum=Integer.parseInt(mapInput.nextLine());
 		objects.add(new Circle(x,y,orderNum,time));
 		nextLine=mapInput.nextLine();
 		//tie in time references to each object
-	    }//add cases for slider lol
+	    }else if (nextLine.equals("S")){
+		nextLine = mapInput.nextLine();
+		ArrayList<Point> points = new ArrayList<Point>();
+		int i,j;
+		while (!nextLine.equals("close")){
+		    i=Integer.parseInt(nextLine);
+		    j=Integer.parseInt(mapInput.nextLine());
+		    points.add(new Point(i,j));
+		    nextLine = mapInput.nextLine();
+		}
+		System.out.println("swag"+nextLine);
+		double time = Double.parseDouble(mapInput.nextLine());
+		int orderNum = Integer.parseInt(mapInput.nextLine());
+		int numOfSteps = Integer.parseInt(mapInput.nextLine());
+		Slider s =new Slider((int)points.get(0).getX(),
+				       (int)points.get(0).getY(),
+				       orderNum,time,points,numOfSteps);
+
+		s.findPoints();
+		//System.out.println(s.pathOfPoints);
+		objects.add(s);
+		nextLine=mapInput.nextLine();
+	    }
 	}
 
 	timer = new Timer(20,this);
@@ -125,13 +146,12 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     public void streamMedia(){
 	t1 = new Thread(song);
 	vw = new VideoWorker(this,dir,videoPath);
-	add(vw.p);
-	vw.execute();
+	//add(vw.p);//readd this after testing
+	//vw.execute();
 	t1.start();
 	repaint();
 	revalidate();
 	startTime = System.currentTimeMillis()/1000.0;
-	System.out.println(startTime);
     }
     public void setFrame(Window w){
 	this.w = w;
@@ -156,6 +176,11 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 		    g2d.drawImage(hitCircle,o.x-circleSize/2,
 				  o.y-circleSize/2,
 				  circleSize,circleSize,this);
+		}else if (o instanceof Slider){
+		    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, o.transparency));
+		    for (Point p:((Slider)o).pathOfPoints){
+			g2d.drawImage(hit0,(int)p.getX(),(int)p.getY(),this);
+		    }
 		}
 		g2d.drawImage(approachCircle,o.x-o.aCircleSize/2,
 			    o.y-o.aCircleSize/2,
@@ -181,11 +206,11 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     public void hitNote(PrintableObject o){
 	error = Math.abs(o.aCircleSize-70)/70.0;
 	if (o.aCircleSize<150){
-	    if (Math.pow(mouseX-o.x,2)+Math.pow(mouseY-o.y,2) < 4900 && error < .15){
+	    if (Math.pow(mouseX-o.x,2)+Math.pow(mouseY-o.y,2) < 1225 && error < .15){
 		objects.remove(o);
 		hitNums.add(new HitNum(o.x,o.y,300));
 		playHit();
-	    }else if (Math.pow(mouseX-o.x,2)+Math.pow(mouseY-o.y,2) < 6400){
+	    }else if (Math.pow(mouseX-o.x,2)+Math.pow(mouseY-o.y,2) < 1600){
 		if (error < .4){
 		    objects.remove(o);
 		    hitNums.add(new HitNum(o.x,o.y,100));
@@ -324,7 +349,6 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	    int keyNum = e.getKeyCode();
 	    if (keyNum == KeyEvent.VK_Z){
 		key1down = false;
-		System.out.println(mouseX+","+mouseY);
 	    }else if (keyNum == KeyEvent.VK_X){
 		key2down = false;
 		

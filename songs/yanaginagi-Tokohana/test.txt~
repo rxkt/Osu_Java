@@ -2,35 +2,51 @@
 ##format is as follows:
 ##
 ##song file name
-##Type1: C for circle
+##Type1: C for circle, S for slider, O for spinner.
+##(incase the letter comparisions lag the beginning, use numbers)
 ##X coord (in relation to java GUI)
 ##Y Coord
 ##Executed time (Starting from 0)
 ##Order number
-##Type 2: S for spiiner
 ##????Array of all coordinates in here
 ##Executed time
 ##Order number
-##Type 3: O for Spinner
 ##Executed time
 ##end song in file by simply having "end" as input
 ##
 ##the following is a test!!! lol
+song
 Tokohanaby  Nagi Yanagi.mp3
+video
 Black Bullet - Ending.avi
 C
 500
 500
-2
+5
 1
 C
 550
 500
-2.25
+6.25
 2
 C
 600
 500
-2.5
+7.5
 3
+C
+400
+400
+8
+4
+C
+300
+300
+8.5
+5
+C
+100
+500
+10
+6
 end

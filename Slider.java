@@ -12,7 +12,7 @@ public class Slider extends PrintableObject{
     //points used for be'zier curve
     protected List<Point> points;
     protected List<Point> pathOfPoints;
-
+    protected int turnArounds;
     //denotes when the sliderBall will approach the end of the slider.
     //use this for be'zier curve.
     //protected float sliderBallTime;
@@ -25,39 +25,54 @@ public class Slider extends PrintableObject{
 	this.orderNum = orderNum;
 	this.time = time;
 	this.points = points;
+	this.numOfSteps = numOfSteps;
+	pathOfPoints = new ArrayList<Point>();
 	//sliderBallTime=0;
     }
-    public void findPoints(int numOfSteps){
-	float time=0;
-	for (;time<=1;time+=(1.0f/numOfSteps)){
+    public void findPoints(){
+	double time=0;
+	for (;time<=1;time+=(1.0/numOfSteps)){
 	    addPointAt(time);
 	}
 	
     }
-    public void addPointAt(float time){
-	int x=0,y=0;
+    public void addPointAt(double time){
+	double x=0,y=0;
 	int aLength=points.size();
 	for (int i =0;i<aLength;i++){
 	    //current point
 	    Point p = points.get(i);
-	    x+=p.getX()*Math.pow(1-time,aLength-1-i)*
-		(Math.pow(time,i))*combination(aLength-1,i);
-	    y+=p.getY()*Math.pow(1-time,aLength-1-i)*
-		(Math.pow(time,i))*combination(aLength-1,i);
+	    x+=(p.getX()*Math.pow(1-time,(double)(aLength-1-i))*
+		Math.pow(time,(double)i)*combination(aLength-1,i));
+	    y+=(p.getY()*Math.pow(1-time,(double)(aLength-1-i))*
+		Math.pow(time,(double)i)*combination(aLength-1,i));
 	}
-	pathOfPoints.add(new Point(x,y));	    
+	System.out.println(x+","+y+","+(1-time));
+	pathOfPoints.add(new Point((int)x,(int)y));	    
     }
-    public int combination(int n, int r){
-	//in format nCr -> n!/(n-r)!r!, all creds to eric for 
-	//writing this method even tho it's a sugoi/different loop format
-	int ans =1;
-	for (;n>r;n--){
-	    ans*=n;
-	}
-	for (;r>1;r--){
-	    ans/=r;
-	}
+    public static int factorial(int n){
+	int ans = 1;
+	if (n==0)
+	    return ans;
+	else
+	    while (n > 1){
+		ans*=n;
+		n--;
+	    }
 	return ans;
     }
-    
+    public static int combination(int n, int r){
+	return factorial(n)/(factorial(r)*factorial(n-r));
+    }
+    public static void main(String[] args){
+	
+	System.out.println(combination(2,0));
+	System.out.println(combination(2,1));
+	System.out.println(combination(2,2));
+
+	System.out.println(combination(3,0));
+	System.out.println(combination(3,1));
+	System.out.println(combination(3,2));
+	System.out.println(combination(3,3));
+    }    
 }
