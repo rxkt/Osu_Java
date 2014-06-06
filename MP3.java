@@ -4,7 +4,7 @@ import javazoom.jl.player.Player;
 
 public class MP3 implements Runnable{
     private String filename;
-    private Player player; 
+    protected Player player; 
 
     public MP3(String filename) {
         this.filename = filename;

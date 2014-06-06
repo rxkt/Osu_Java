@@ -17,6 +17,7 @@ public class Window extends JFrame{
     //have a jpanel dedicated to playing music? or container for less workload. but more memory usage.
 
     GameBoard current;
+    SelectScreen screen;
     public Window(){
 	int width =1000,height=600;
 	//add((new GameBoard("yanaginagi-Tokohana/","test.txt")));
@@ -40,13 +41,21 @@ public class Window extends JFrame{
 	revalidate();
 	current.requestFocusInWindow();
     }
+    public void addScreen(boolean b){
+	screen = new SelectScreen(b);
+	screen.w=this;
+	add(screen);
+	revalidate();
+	screen.requestFocusInWindow();
+    }
     public String toString(){
 	return "Window";
 
     }
     public static void main(String[] args){
 	Window w= new Window();
-	w.addPanel("songs/yanaginagi-Tokohana/","test.txt",70);
+	//w.addPanel("songs/yanaginagi-Tokohana/","test.txt",70);
 	//change songs to a search using java file doc
+	w.addScreen(false);
     }
 }
