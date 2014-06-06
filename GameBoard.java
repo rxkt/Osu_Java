@@ -127,7 +127,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 		System.out.println("swag"+nextLine);
 		double time = Double.parseDouble(mapInput.nextLine());
 		int orderNum = Integer.parseInt(mapInput.nextLine());
-		int numOfSteps = Integer.parseInt(mapInput.nextLine());
+		int numOfSteps = (points.size()-2)*50;
 		Slider s =new Slider((int)points.get(0).getX(),
 				       (int)points.get(0).getY(),
 				       orderNum,time,points,numOfSteps);
