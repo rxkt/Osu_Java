@@ -54,8 +54,8 @@ public class Window extends JFrame{
     }
     public static void main(String[] args){
 	Window w= new Window();
-	w.addPanel("songs/yanaginagi-Tokohana/","test.txt",70);
+	//w.addPanel("songs/yanaginagi-Tokohana/","test.desu",70);
 	//change songs to a search using java file doc
-	//w.addScreen(false);
+	w.addScreen(false);
     }
 }

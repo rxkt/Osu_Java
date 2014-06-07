@@ -10,7 +10,9 @@ public class Background extends JPanel{
         img = Toolkit.getDefaultToolkit().createImage(path);
 	setOpaque(true);
     }
-
+    public void loadImage(String path){
+        img = Toolkit.getDefaultToolkit().createImage(path);
+    }
     public void paint(Graphics g){
         // Draws the img to the BackgroundPanel.
         g.drawImage(img, 0, 0,1000,600, null);

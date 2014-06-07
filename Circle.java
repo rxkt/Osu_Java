@@ -1,10 +1,9 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import java.util.ArrayList;
 
 public class Circle extends PrintableObject{
-    private String imageSrc;
+    protected String imageSrc;
     //load image in the board, pass it down to circle
     //for optimization on speed
     
