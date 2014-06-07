@@ -4,6 +4,7 @@ import java.awt.event.*;
 import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.io.*;
 import javax.sound.sampled.*;
 
@@ -13,15 +14,18 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
     protected Font font;
     protected int mode;//0 denotes titleScreen, 1 denotes song screen.
     protected int mouseX,mouseY;
-    //images?
+    //mode 0
     protected ImageIcon desuIcon,playIcon,optionsIcon,exitIcon;
     protected Image desu,play,options,exit;
-    protected ImageIcon blueBoxIcon,orangeBoxIcon,whiteBoxIcon;
-    protected Image blueBox, whiteBox, orangeBox;
     protected Background bgPanel;
     protected boolean bgChanged;
     protected int playOverlap,optionsOverlap,exitOverlap;
-    
+    //mode 1
+    protected List<List<ImageObject>> selectTabs;
+    protected ImageIcon blueTabIcon,purpleTabIcon,redTabIcon;
+    protected Image blueTab,purpleTab,redTab;
+    protected Image darkFilter;
+
     //current mp3.
     protected MP3 song;
     //current options selected.
@@ -32,6 +36,8 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
     protected File[] listOfSongs;
     protected File currentSongDir;
     protected int musicIndex;
+    protected int beatmapIndex;
+    protected ImageObject currentBeatmap;
 
     //under mouseAdapter
     protected double exitTime;
@@ -44,6 +50,16 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 	addMouseListener(new MAdapter());
 	addKeyListener(new TAdapter());
 	addMouseMotionListener(this);
+	try{
+	    Font font = Font.createFont(Font.TRUETYPE_FONT,new File("default/Exo.ttf"));
+	    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+	    ge.registerFont(font);
+	    font = font.deriveFont(28f);
+	    setFont(font);
+	}catch(Exception ex){
+	    ex.printStackTrace();
+	}
+
 	//mode 0 items
 	desuIcon = new ImageIcon("default/icon.png");
 	desu = desuIcon.getImage();
@@ -51,18 +67,22 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 	play = playIcon.getImage();
 	optionsIcon = new ImageIcon("default/options.png");
 	options = optionsIcon.getImage();
-	exitIcon = new ImageIcon("default/exit.png");
+        exitIcon = new ImageIcon("default/exit.png");
 	exit = exitIcon.getImage();
-	blueBoxIcon= new ImageIcon("default/blueBox.png");
-	blueBox = blueBoxIcon.getImage();
-	orangeBoxIcon= new ImageIcon("default/orangeBox.png");
-	orangeBox = orangeBoxIcon.getImage();
-	whiteBoxIcon= new ImageIcon("default/whiteBox.png");
-	orangeBox = orangeBoxIcon.getImage();
+	blueTabIcon = new ImageIcon("default/blueTab.png");
+	blueTab = blueTabIcon.getImage();
+	redTabIcon = new ImageIcon("default/redTab.png");
+	redTab = redTabIcon.getImage();
+	purpleTabIcon = new ImageIcon("default/purpleTab.png");
+	purpleTab = purpleTabIcon.getImage();
+	
 	playOverlap=0;
 	optionsOverlap=0;
 	exitOverlap=0;
 	//mode 1 items
+	selectTabs= new ArrayList<List<ImageObject>>();
+	darkFilter= Toolkit.getDefaultToolkit().createImage("default/black.jpg");
+
 	songsDir = new File("./songs/");
 	this.video = video;
 	listOfSongs = songsDir.listFiles();
@@ -155,8 +175,8 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 	super.paint(g);
 
 	Graphics2D g2d = (Graphics2D)g;
-	bgPanel.paint(g2d);	
 	if (mode==0){
+	    bgPanel.paint(g2d);	
 	    //move tabs over 40 if mouse is on top of this.
 	    g2d.drawImage(play,560-playIcon.getIconWidth()/2+playOverlap,
 			  200-playIcon.getIconHeight()/2,this);
@@ -168,12 +188,61 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 			  300-desuIcon.getIconHeight()/2,this);
 	    
 	}else if (mode==1){
+	    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,0.65f));  
+	    bgPanel.paint(g2d);	
+	    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,0.45f));
+	    g2d.drawImage(darkFilter,0,0,null);
+	    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,1));
+	    //
+	    paintTabs(g2d);
 	    
-	    //find background.png, put it into bgPanel.
-	    //paint.
-	    //loop thru all .desu files, paint a blue box.
-	    //orange boxes denote other dirs
 	}
+	Toolkit.getDefaultToolkit().sync();
+	g.dispose();
+       
+    }
+    public void paintTabs(Graphics2D g2d){
+	//draw current tab
+	
+	g2d.setColor(Color.WHITE);
+	
+	g2d.drawImage(purpleTab,currentBeatmap.x-purpleTabIcon.getIconWidth()/2,
+		      currentBeatmap.y-purpleTabIcon.getIconHeight()/2,this);
+	g2d.drawString(currentBeatmap.data,currentBeatmap.x-260,
+		       currentBeatmap.y-10);
+	//for description for this loop, see focusTabs()
+        for (int j=0;j<selectTabs.size();j++){
+	    if (j!= musicIndex){
+		ImageObject unselected = selectTabs.get(j).get(0);
+		if (unselected.y > -100 && unselected.y < 700){
+		    //red
+		    g2d.drawImage(redTab, unselected.x-redTabIcon.getIconWidth()/2,
+				  unselected.y-redTabIcon.getIconHeight()/2,this);
+		    g2d.drawString(unselected.data,unselected.x-260,
+				   unselected.y-10);
+
+		}
+	    }else{
+		List<ImageObject> currentTabs = selectTabs.get(j);
+		//we do not include 0 because that is the unselected 'header'
+		for (int i=1;i<currentTabs.size();i++){
+		    ImageObject selected = currentTabs.get(i);
+		    if (i != beatmapIndex){
+			if (selected.y > -100 && selected.y < 700){
+			    //red
+			    g2d.drawImage(blueTab, selected.x-blueTabIcon.getIconWidth()/2,
+					  selected.y-blueTabIcon.getIconHeight()/2,this);
+			    g2d.drawString(selected.data,selected.x-260,
+					   selected.y-10);
+
+			}
+		    }
+		}
+	    }
+	}
+	//draw tabs below it.
+	
+	//draw tabs to the side.
     }
     public void actionPerformed(ActionEvent e){
 	
@@ -208,19 +277,73 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 		//
 		//here^^.
 	    }
-	    //do stuff in mode 1 below
+	    focusTabs();
 	}
-		
-	    
 	
 	repaint();
+    }
+    public void focusTabs(){
+	//currentbeatmap is always at x,y.
+	for (int j=0;j<selectTabs.size();j++){
+	    //if we are not in the same music folder
+	    if (j< musicIndex){
+		//there will only be index 0 on the screen.
+		//the y value will be the #of unselected beatmaps above currentBeatmap + the
+		//# of beatmaps in the current directory above currentBeatmap
+		ImageObject unselected = selectTabs.get(j).get(0);
+	        unselected.y=currentBeatmap.y-(musicIndex-j+beatmapIndex-1)*100;
+		unselected.x = 800 +Math.abs(300-unselected.y);
+	    }else if(j> musicIndex){
+		ImageObject unselected = selectTabs.get(j).get(0);
+	        unselected.y=currentBeatmap.y+(selectTabs.get(musicIndex).size()-beatmapIndex)*100;
+		unselected.x = 800 + Math.abs(300-unselected.y);
+
+	    }else{
+		List<ImageObject> currentTabs = selectTabs.get(j);
+		//we do not include 0 because that is the unselected 'header'
+		for (int i=1;i<currentTabs.size();i++){
+		    ImageObject selected = currentTabs.get(i);
+		    selected.y = currentBeatmap.y-(beatmapIndex-i)*100;
+		    selected.x = 800 + Math.abs(300-selected.y);
+		}
+	    }
+	}
+    }
+    public void loadSelection(){
+	for (File f:listOfSongs){
+	    
+	    File[] listing = f.listFiles();
+	    List<ImageObject> maps = new ArrayList<ImageObject>();
+	    maps.add(new ImageObject(0,0,redTab,f.getName()));
+	    int numOfDesuFiles=0;
+	    for (File file:listing){
+		String name = file.getName();
+		if (name.contains(".desu")){
+		    maps.add(new ImageObject(800,300,blueTab,name.substring(0,name.length()-5)));
+		    //be sure to switch it to purple if it is selected.
+		    numOfDesuFiles++;
+		}
+	    }
+	    if (currentSongDir.getPath().contains(f.getName())){
+		beatmapIndex = (int)(Math.random()*numOfDesuFiles+1);
+		
+	    }
+	    selectTabs.add(maps);
+	}
+	currentBeatmap=selectTabs.get(musicIndex).get(beatmapIndex);
+	System.out.println(currentBeatmap);
     }
     public class TAdapter extends KeyAdapter{
 	public void keyReleased(KeyEvent e){
 	    int keyNum = e.getKeyCode();
 	    if ( mode==1 && keyNum == KeyEvent.VK_ESCAPE){
-		//go back to title screen
+		//go back to title screen and reset all variables.
 		mode=0;
+		playOverlap=0;
+		optionsOverlap=0;
+		exitOverlap=0;
+		selectTabs = new ArrayList<List<ImageObject>>();
+	       
 		menuBack();
 		bgPanel.loadImage("default/titleBG.png");
 	    }
@@ -246,8 +369,10 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 		}else if(playOverlap!=0){
 		    menuHit();
 		    mode=1;
+		    loadSelection();
 		}
 	    }
+	    System.out.println(mouseX+","+mouseY);
 	}
     }
 	    

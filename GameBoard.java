@@ -227,7 +227,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	try{
 	    Clip hitnormal;
 	    hitnormal= AudioSystem.getClip();
-	    hitnormal.open(AudioSystem.getAudioInputStream(new File(dir+"hitnormal.wav")));
+	    hitnormal.open(AudioSystem.getAudioInputStream(new File("default/normal-hitnormal.wav")));
 	    hitnormal.start();
 	}catch(Exception e){
 	    e.printStackTrace();

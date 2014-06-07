@@ -1,7 +1,8 @@
 import java.awt.*;
 import java.awt.image.*;
 import javax.swing.*;
-
+import javax.imageio.*;
+import java.io.*;
 public class Background extends JPanel{
     // The Image to store the background image in.
     protected Image img;
@@ -11,7 +12,11 @@ public class Background extends JPanel{
 	setOpaque(true);
     }
     public void loadImage(String path){
-        img = Toolkit.getDefaultToolkit().createImage(path);
+	try{
+	    img =ImageIO.read(new File(path));
+	}catch(Exception e){
+	    e.printStackTrace();
+	}
     }
     public void paint(Graphics g){
         // Draws the img to the BackgroundPanel.
