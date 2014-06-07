@@ -7,27 +7,19 @@ ______game mechanics____________________________________________________________
 
 !!as time runs out, create the title screen now as well as the song selection screen.
 
--->Read up on java documentation for reading directories
-
 //may leave out//change sizes of circle + approach rate, specify + put them into gameBoard.java
 
 TAKE A BREAK AND DO SOMETHING EASY! MAKE A VARIABLE CURSOR!
 
 DO SLIDERS! use beziers curve + cominatorics(already done) to determine points.
-as for printing them on the screen with a variable thickness, idk.
-stackoverflow.com/questions/8325680/how-to-draw-a-bezier-curve-with-variable-thickness-on-an-html-canvas
+variable thickness - print using CubicCurve2D
 
-DO SPINNERS! ...find a circle algorithm?
+DO SPINNERS! ...find a circle algorithm? nah skip.
 
 ______game management + file mechancs:________________________________________________________
 
-learn java file directory readings.
-PLACE ALL SONG FOLDERS IN A /songs/ DIRECTORY
 level/game selection screen. selection screen is 1 panel that opens a gameBoard jpanel.
-find out how to return to selection screen after 1 game is finished.
-
-title screen - edit the window jframe.
-perhaps move the mp3 playing to the window jframe instead.
+..find out how to return to selection screen after 1 game is finished.
 
 options screen- make the video optional so you don't kill everyone's processor + memory.
-in that case, make a background picture.
+-->in that case, make a background picture.
