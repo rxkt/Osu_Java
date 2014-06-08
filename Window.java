@@ -51,6 +51,10 @@ public class Window extends JFrame{
 	revalidate();
 	screen.requestFocusInWindow();
     }
+    public void removePanel(JPanel j){
+	remove(j);
+	revalidate();
+    }
     public String toString(){
 	return "Window";
 

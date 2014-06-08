@@ -127,6 +127,7 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
     //start the music from the middle of the song.
     public void startMusicM(int musicIndex){
 	File dir = listOfSongs[musicIndex];
+	this.musicIndex=musicIndex;
 	File[] listOfObjects = dir.listFiles();
 	for (File f:listOfObjects){
 	    if (f.getPath().contains("mp3")){
@@ -287,9 +288,12 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 			}
 		    }
 		}
-		//perform song change actions
-		//
-		//here^^.
+	    }
+	    if (song!=null){
+		if (song.player.isComplete()){
+		    song.close();
+		    startMusicM(musicIndex);
+		}
 	    }
 	    focusTabs();
 	}
@@ -323,6 +327,8 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
     
     public void focusTabs(){
 	//currentbeatmap is always at x,y.
+	currentBeatmap.x=800;
+	currentBeatmap.y=300;
 	for (int j=0;j<selectTabs.size();j++){
 	    //if we are not in the same music folder
 	    if (j< musicIndex){
@@ -372,6 +378,64 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 	currentBeatmap=selectTabs.get(musicIndex).get(beatmapIndex);
 	System.out.println(currentBeatmap);
     }
+    //this methods assumes you clicked.
+    public void interactWithTab(){
+	ImageObject hovered = mouseOver();
+	if (hovered!=null){
+	    if (hovered.y == currentBeatmap.y){
+
+		//remember to add a screen after oyu finsih the song!
+		
+		if (song!=null&&!song.player.isComplete())
+		    song.close();
+		w.removePanel(this);
+		try{
+		    Thread.sleep(3000);
+		    w.addPanel(currentSongDir.getPath()+"\\",currentBeatmap.data+".desu",70);
+		}catch(Exception ex){
+		    ex.printStackTrace();
+		}
+	    }
+	    for (int j=0;j<selectTabs.size();j++){
+		if (j!= musicIndex){
+		    ImageObject unselected = selectTabs.get(j).get(0);
+		    if (unselected.y > -100 && unselected.y < 700){
+		        if (unselected.y==hovered.y){
+			    //open a red tab. current = that now.
+			    currentSongDir=listOfSongs[j];
+			    musicIndex=j;
+			    beatmapIndex=1;
+			    currentBeatmap=selectTabs.get(j).get(1);
+			    bgChanged=true;
+			    song.close();
+			    startMusicM(j);
+			}
+		    }
+		}else{
+		    List<ImageObject> currentTabs = selectTabs.get(j);
+		    for (int i=1;i<currentTabs.size();i++){
+			ImageObject selected = currentTabs.get(i);
+			if (selected.y > -100 && selected.y < 700){
+			    //this is a blue tab.
+			    if (selected.y==hovered.y){
+				currentBeatmap=selected;
+				beatmapIndex=i;
+				focusTabs();
+				return;
+			    }
+			}
+		    }
+		}
+	    }
+	    //if current && clicked
+	    ////window.adds new map.
+	    //else if j=musicIndex aka you clicked a blueTab winthin the same folder
+	    ////current = blah, beatmapindex=blah.
+	    //else, you clicked something from another folder.
+	    ////startmusicM(the thing you clicked.)
+	    ////beatmapIndex=1 b/c 0 is a closed tab. currentBeatmap = first
+	}
+    }
     public class TAdapter extends KeyAdapter{
 	public void keyReleased(KeyEvent e){
 	    int keyNum = e.getKeyCode();
@@ -410,6 +474,9 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 		    mode=1;
 		    loadSelection();
 		}
+	    }else if (mode==1){
+		interactWithTab();
+		System.out.println(currentBeatmap);
 	    }
 	    System.out.println(mouseX+","+mouseY);
 	}

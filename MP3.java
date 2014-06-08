@@ -24,19 +24,19 @@ public class MP3 implements Runnable{
             BufferedInputStream bis = new BufferedInputStream(fis);
             player = new Player(bis);
         }catch(Exception e){
-		System.out.println("Problem playing file " + filename);
-		System.out.println(e);
-	    }
-	    // run in new thread to play in background swag.
-	    new Thread(){
-		public void run(){
-		    try{
-			player.play();
-		    }
-		    catch(Exception e){
-			System.out.println(e);
-		    }
-		}
-	    }.start();
+	    System.out.println("Problem playing file " + filename);
+	    System.out.println(e);
 	}
+	// run in new thread to play in background swag.
+	new Thread(){
+	    public void run(){
+		try{
+		    player.play();
+		}
+		catch(Exception e){
+		    System.out.println(e);
+		}
+	    }
+	}.start();
     }
+}
