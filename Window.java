@@ -23,7 +23,7 @@ public class Window extends JFrame{
 	int width =1000,height=600;
 	//add((new GameBoard("yanaginagi-Tokohana/","test.txt")));
 	Image cursorImage = Toolkit.getDefaultToolkit().createImage("default/cursor.gif");
-	Point point = new Point(30,30);
+	Point point = new Point(15,15);
 	Cursor cursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImage,point,"hi");
 	setCursor(cursor);
 	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

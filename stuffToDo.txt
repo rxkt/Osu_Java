@@ -5,11 +5,7 @@ And some explanations in case eric forgets stuff.
 
 ______game mechanics________________________________________________________________________
 
-!!as time runs out, create the title screen now as well as the song selection screen.
-
 //may leave out//change sizes of circle + approach rate, specify + put them into gameBoard.java
-
-TAKE A BREAK AND DO SOMETHING EASY! MAKE A VARIABLE CURSOR!
 
 DO SLIDERS! use beziers curve + cominatorics(already done) to determine points.
 variable thickness - print using CubicCurve2D
@@ -18,8 +14,7 @@ DO SPINNERS! ...find a circle algorithm? nah skip.
 
 ______game management + file mechancs:________________________________________________________
 
-level/game selection screen. selection screen is 1 panel that opens a gameBoard jpanel.
 ..find out how to return to selection screen after 1 game is finished.
 
 options screen- make the video optional so you don't kill everyone's processor + memory.
--->in that case, make a background picture.
+bg picture!
