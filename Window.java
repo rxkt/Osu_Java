@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.*;
 
 public class Window extends JFrame{
     //expand this soon to the titlescreen
@@ -21,7 +22,10 @@ public class Window extends JFrame{
     public Window(){
 	int width =1000,height=600;
 	//add((new GameBoard("yanaginagi-Tokohana/","test.txt")));
-	
+	Image cursorImage = Toolkit.getDefaultToolkit().createImage("default/cursor.gif");
+	Point point = new Point(0,0);
+	Cursor cursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImage,point,"hi");
+	setCursor(cursor);
 	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	setSize(width,height);
 	setLocationRelativeTo(null);
@@ -33,7 +37,7 @@ public class Window extends JFrame{
     public void addPanel(String dir, String source,int circleSize){
 	current = new GameBoard(dir,source,circleSize);
 	current.setFrame(this);
-
+	//set cursor + discrepancy inside current.
 	add(current);
 	current.streamMedia();
 	current.repaint();

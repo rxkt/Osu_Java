@@ -44,7 +44,6 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
     public SelectScreen(boolean video){
 	setFocusable(true);
 	setVisible(true);
-	setBackground(Color.BLACK);
 	bgPanel = new Background("default/titleBG.png");
 	bgChanged=false;
 	addMouseListener(new MAdapter());
