@@ -23,7 +23,7 @@ public class Window extends JFrame{
 	int width =1000,height=600;
 	//add((new GameBoard("yanaginagi-Tokohana/","test.txt")));
 	Image cursorImage = Toolkit.getDefaultToolkit().createImage("default/cursor.gif");
-	Point point = new Point(0,0);
+	Point point = new Point(30,30);
 	Cursor cursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImage,point,"hi");
 	setCursor(cursor);
 	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -37,7 +37,6 @@ public class Window extends JFrame{
     public void addPanel(String dir, String source,int circleSize){
 	current = new GameBoard(dir,source,circleSize);
 	current.setFrame(this);
-	//set cursor + discrepancy inside current.
 	add(current);
 	current.streamMedia();
 	current.repaint();

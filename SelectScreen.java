@@ -207,8 +207,15 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 	
 	g2d.drawImage(purpleTab,currentBeatmap.x-purpleTabIcon.getIconWidth()/2,
 		      currentBeatmap.y-purpleTabIcon.getIconHeight()/2,this);
+	ImageObject io = mouseOver();
+	//incase we are hovering over this...
+	//(we will compare y values, even though the addresses are the same.)
+	if (io!= null && currentBeatmap.y==io.y)
+	    g2d.setColor(Color.BLACK);
 	g2d.drawString(currentBeatmap.data,currentBeatmap.x-260,
 		       currentBeatmap.y-10);
+	if (io!= null && currentBeatmap.y==io.y)
+	    g2d.setColor(Color.WHITE);
 	//for description for this loop, see focusTabs()
         for (int j=0;j<selectTabs.size();j++){
 	    if (j!= musicIndex){
@@ -217,9 +224,13 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 		    //red
 		    g2d.drawImage(redTab, unselected.x-redTabIcon.getIconWidth()/2,
 				  unselected.y-redTabIcon.getIconHeight()/2,this);
+		    //incase we are hovering over this...
+		    if (io!= null && unselected.y==io.y)
+			g2d.setColor(Color.BLACK);
 		    g2d.drawString(unselected.data,unselected.x-260,
 				   unselected.y-10);
-
+		    if (io!= null && unselected.y==io.y)
+			g2d.setColor(Color.WHITE);
 		}
 	    }else{
 		List<ImageObject> currentTabs = selectTabs.get(j);
@@ -231,9 +242,13 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 			    //red
 			    g2d.drawImage(blueTab, selected.x-blueTabIcon.getIconWidth()/2,
 					  selected.y-blueTabIcon.getIconHeight()/2,this);
+			    //incase we are hovering over this...
+			    if (io!= null && selected.y==io.y)
+				g2d.setColor(Color.BLACK);
 			    g2d.drawString(selected.data,selected.x-260,
 					   selected.y-10);
-
+			    if (io!= null && selected.y==io.y)
+				g2d.setColor(Color.WHITE);
 			}
 		    }
 		}
@@ -281,6 +296,31 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 	
 	repaint();
     }
+    //returns the tab that the mouse is hovering over
+    //returns null if it isn't hovering over anything.
+    public ImageObject mouseOver(){
+	for (int j=0;j<selectTabs.size();j++){
+	    if (j!= musicIndex){
+		ImageObject unselected = selectTabs.get(j).get(0);
+		if (unselected.y > -100 && unselected.y < 700){
+		    //all tabs are the same. i'ma just use red.
+		    if (Math.abs(unselected.y - mouseY) < (redTabIcon.getIconHeight()/2))
+			return unselected;
+		}
+	    }else{
+		List<ImageObject> currentTabs = selectTabs.get(j);
+		for (int i=1;i<currentTabs.size();i++){
+		    ImageObject selected = currentTabs.get(i);
+		    if (selected.y > -100 && selected.y < 700){
+			if (Math.abs(selected.y - mouseY) < (redTabIcon.getIconHeight()/2))
+			    return selected;
+		    }
+		}
+	    }
+	}
+	return null;
+    }
+    
     public void focusTabs(){
 	//currentbeatmap is always at x,y.
 	for (int j=0;j<selectTabs.size();j++){
