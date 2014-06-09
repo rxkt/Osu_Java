@@ -4,7 +4,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;//arrayList for all printed objects
 import java.util.List;
+import java.util.Arrays;
 import java.util.Scanner;//scan files beatmap files
+import java.util.LinkedList;
 import java.util.concurrent.*;//for cyclic barrier
 import java.io.*;
 import javax.sound.sampled.*;
@@ -26,11 +28,15 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     protected boolean key1used,key2used;
     protected int mouseX, mouseY;
     //printable objects
+    protected Background bgPanel;
     protected Image approachCircle;
     protected Image hitCircle;
+    protected Image ball;
+    protected SliderBall sliderBall;
+    protected LinkedList<Integer> criticalPts;
+
     protected Image hit300,hit300g,hit300k,hit100,hit100k,hit50,hit0;
 	
-    protected List<ApproachCircle> approachCircles;
     protected List<PrintableObject> objects;
     protected List<HitNum> hitNums;
     //unite all circles and sliders into 1 list<object>
@@ -49,13 +55,22 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	nextLine="";
      	setFocusable(true);
 	setVisible(true);
-	setBackground(Color.BLACK);
 	this.dir=dir;
-	setOpaque(false);
-	setLayout(new BorderLayout());
+	setOpaque(true);
+	//setLayout(new BorderLayout());
 	addKeyListener(new TAdapter());
 	addMouseListener(new MAdapter());
 	addMouseMotionListener(this);
+	File currentSongDir = new File(dir);
+	if (currentSongDir!=null){
+	    File[] files = currentSongDir.listFiles();
+	    for (File f:files){
+		if (f.getPath().contains("ackground")){
+		    bgPanel= new Background(f.getPath());
+		}
+	    }
+	}
+
 	//open the scanned file
 	try{
 	    //start up scanner
@@ -79,78 +94,100 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	}
 	song = new MP3(dir+songPath);
 	//load all images into memory	
-	approachCircle = new ImageIcon(dir+"approachCircle.png").getImage();
-	hitCircle = new ImageIcon(dir+"hitcircle.png").getImage();
-	hit300 = new ImageIcon(dir+"hit300.png").getImage();
-	hit300g= new ImageIcon(dir+"hit300g.png").getImage();
-	hit300k= new ImageIcon(dir+"hit300k.png").getImage();
-	hit100= new ImageIcon(dir+"hit100.png").getImage();
-	hit100k= new ImageIcon(dir+"hit100k.png").getImage();
-	hit50= new ImageIcon(dir+"hit50.png").getImage();
-	hit0= new ImageIcon(dir+"hit0.png").getImage();
+	approachCircle = new ImageIcon("default/approachCircle.png").getImage();
+	hitCircle = new ImageIcon("default/hitcircle.png").getImage();
+	hit300 = new ImageIcon("default/hit300.png").getImage();
+	hit300g= new ImageIcon("defaulthit300g.png").getImage();
+	hit300k= new ImageIcon("default/hit300k.png").getImage();
+	hit100= new ImageIcon("default/hit100.png").getImage();
+	hit100k= new ImageIcon("default/hit100k.png").getImage();
+	hit50= new ImageIcon("default/hit50.png").getImage();
+	hit0= new ImageIcon("default/hit0.png").getImage();
+	ball = new ImageIcon("default/sliderb0.png").getImage();
+	sliderBall = new SliderBall();
 
 	lastHitTime=0;
 	this.circleSize = circleSize;
-	approachCircles = new ArrayList<ApproachCircle>();
 	objects=new ArrayList<PrintableObject>();
 	hitNums = new ArrayList<HitNum>();
+	criticalPts = new LinkedList<Integer>();
         nextLine = mapInput.nextLine();
 	if (nextLine.equals("video")){
 	    videoPath=mapInput.nextLine();
-	    nextLine=mapInput.nextLine();    
+	    nextLine=mapInput.next();
 	    // ^^^^to align both cases of having both video and no video
 	}
+	System.out.println(nextLine);
 	//else{
 	//    there is no video. assume the next line is the beginning
 	//    of a new note.
 	
 	//here begins the test.txt file reading.
-	while (!nextLine.equals("end")){
+	while (mapInput.hasNext()){
 	    if (nextLine.equals("C")){
-		int x=Integer.parseInt(mapInput.nextLine());
-		int y=Integer.parseInt(mapInput.nextLine());
-		double time=Double.parseDouble(mapInput.nextLine());
-		int orderNum=Integer.parseInt(mapInput.nextLine());
+		int x=(int)(mapInput.nextInt()*1.5);
+		int y=(int)(mapInput.nextInt()*1.5);
+		double time=mapInput.nextInt()/1000.0;
+		int orderNum=0;//removed functionality
 		objects.add(new Circle(x,y,orderNum,time));
-		nextLine=mapInput.nextLine();
-		//tie in time references to each object
+		//System.out.println("after 1 obj" + nextLine +"!!!");
+		if (mapInput.hasNext())
+		    nextLine=mapInput.nextLine();
+		else
+		    break;//we dont want this crashing our scanner
 	    }else if (nextLine.equals("S")){
-		nextLine = mapInput.nextLine();
+		criticalPts=new LinkedList<Integer>();//refresh list
+		int x=(int)(mapInput.nextInt()*1.5);
+		int y=(int)(mapInput.nextInt()*1.5);
+		double time=mapInput.nextInt()/1000.0;
+		int orderNum=0;
+		//numOfSteps: 0=linear, 1=quad curve, 2 = cubic bezier, so on.
+		//basically the number of controlpoints
 		ArrayList<Point> points = new ArrayList<Point>();
-		int i,j;
-		while (!nextLine.equals("close")){
-		    i=Integer.parseInt(nextLine);
-		    j=Integer.parseInt(mapInput.nextLine());
-		    points.add(new Point(i,j));
-		    nextLine = mapInput.nextLine();
+		mapInput.nextInt();
+		mapInput.nextInt();
+		// ^^^this is useless because multiple versions of osu files are used
+		//queue usage here.
+		mapInput.next();
+		String[] theRest = mapInput.nextLine().split(" ");
+		for (String s:theRest){
+		    if (s.length()!=0)
+			criticalPts.addLast(new Integer((int)(((double)Double.valueOf(s))*1.5)));
 		}
-		System.out.println("swag"+nextLine);
-		double time = Double.parseDouble(mapInput.nextLine());
-		int orderNum = Integer.parseInt(mapInput.nextLine());
-		int numOfSteps = (points.size()-2)*50;
-		Slider s =new Slider((int)points.get(0).getX(),
-				       (int)points.get(0).getY(),
-				       orderNum,time,points,numOfSteps);
-
+		int numOfSteps = mapInput.nextInt();
+		points.add(new Point(x,y));//start point for slider
+		for (int index=0;index<=numOfSteps;index++){
+		    Integer i=criticalPts.removeFirst();
+		    Integer j=criticalPts.removeFirst();
+		    points.add(new Point(i,j));
+		}
+		Slider s =new Slider(x,y,orderNum,time,points,numOfSteps);
 		s.findPoints();
-		//System.out.println(s.pathOfPoints);
+		//System.out.println(points.size());
 		objects.add(s);
+		if (mapInput.hasNext())
+		    nextLine=mapInput.nextLine();
+		else
+		    break;
+	    }else{
 		nextLine=mapInput.nextLine();
 	    }
 	}
-
+	System.out.println("Size"+objects.size());
 	timer = new Timer(20,this);
 	timer.start();
+	requestFocusInWindow();
 	//set cursor w/ toolkit here
     }
     public void streamMedia(){
 	t1 = new Thread(song);
-	vw = new VideoWorker(this,dir,videoPath);
-	//add(vw.p);//readd this after testing
-	//vw.execute();
+	if (videoPath!=null){
+	    System.out.println("This has a video.");
+	    vw = new VideoWorker(this,dir,videoPath);
+	    //add(vw.p);//readd this after testing
+	    //vw.execute();
+	}
 	t1.start();
-	repaint();
-	revalidate();
 	startTime = System.currentTimeMillis()/1000.0;
     }
     public void setFrame(Window w){
@@ -159,18 +196,14 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     public Window getFrame(){
 	return w;
     }
-    public synchronized void paint(Graphics g){
+    public void paint(Graphics g){
 	super.paint(g);
 	Graphics2D g2d = (Graphics2D)g;
-	for (ApproachCircle a:approachCircles){
-	    g2d.drawImage(approachCircle,a.getX(),a.getY(),a.getDiameter(),a.getDiameter(),this);
-	}
+        bgPanel.paint(g2d);
 	if (startTime > 0){
 	    for (PrintableObject o:objects){
 		
-		if (startTime+o.time>currentTime+5){
-		    break;
-		}
+		
 		if (o instanceof Circle){
 		    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,o.transparency));
 		    g2d.drawImage(hitCircle,o.x-circleSize/2,
@@ -179,8 +212,14 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 		}else if (o instanceof Slider){
 		    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, o.transparency));
 		    for (Point p:((Slider)o).pathOfPoints){
-			g2d.drawImage(hit0,(int)p.getX(),(int)p.getY(),this);
+			//just using constants for the sake of time
+			g2d.drawImage(hitCircle,(int)p.getX()-35,(int)p.getY()-35,70,70,this);
 		    }
+		    g2d.drawImage(hitCircle,(int)((Slider)o).points.get(0).getX()-35,
+				  (int)((Slider)o).points.get(0).getY()-35,70,70,this);
+		}
+		if (startTime+o.time>currentTime+5){
+		    break;
 		}
 		g2d.drawImage(approachCircle,o.x-o.aCircleSize/2,
 			    o.y-o.aCircleSize/2,
@@ -203,25 +242,29 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	Toolkit.getDefaultToolkit().sync();
 	g.dispose();
     }
-    public void hitNote(PrintableObject o){
+    public boolean hitNote(PrintableObject o){
 	error = Math.abs(o.aCircleSize-70)/70.0;
 	if (o.aCircleSize<150){
 	    if (Math.pow(mouseX-o.x,2)+Math.pow(mouseY-o.y,2) < 1225 && error < .15){
 		objects.remove(o);
 		hitNums.add(new HitNum(o.x,o.y,300));
 		playHit();
+		return true;
 	    }else if (Math.pow(mouseX-o.x,2)+Math.pow(mouseY-o.y,2) < 1600){
 		if (error < .4){
 		    objects.remove(o);
 		    hitNums.add(new HitNum(o.x,o.y,100));
 		    playHit();
+		    return true;
 		}else if (error < .8){
 		    objects.remove(o);
 		    hitNums.add(new HitNum(o.x,o.y,50));
 		    playHit();
+		    return true;
 		}
 	    }
 	}
+	return false;
     }
     public void playHit(){
 	try{
@@ -235,71 +278,91 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	}
     }
     public void actionPerformed(ActionEvent e){
-	repaint();
+	currentTime = System.currentTimeMillis()/1000.0;
 	time+=0.02;
 	//under click->true,set currentTime. if start+o.time>current+5 break
 	//compare the x,y of the FIRST OBJECT, as well as timing.
 	////////////////////////YOU WERE LAST HERE ERIC////////
 	if (mouseClicked){
 	    mouseClicked=false;
-	    approachCircles.add(new ApproachCircle(mouseX,mouseY));
 	    //check first element objects here
 	    if (objects.size() > 0){
-		PrintableObject o = objects.get(0);
-		hitNote(o);
+		//		PrintableObject o = objects.get(0);
+	        for (int i=0;i<objects.size();i++){
+		    PrintableObject o = objects.get(i);
+		    if (startTime+o.time>currentTime+5){
+			break;//ignore the beats too far ahead in the future.
+		    }else{
+			boolean b = hitNote(o);
+			if (b)
+			    break;//only 1 click per note!!
+		    }
+		    
+		}
 	    }
 	}/////////////check key1
 	if (key1down && key1used==false){
-	    approachCircles.add(new ApproachCircle(mouseX,mouseY));
 	    key1used=true;
 	    //check first element here
 	    if (objects.size() > 0){
-	        PrintableObject o = objects.get(0);
-	        hitNote(o);
+	        //PrintableObject o = objects.get(0);
+	        for (int i=0;i<objects.size();i++){
+		    PrintableObject o = objects.get(i);
+		    if (startTime+o.time>currentTime+5){
+			break;//ignore the beats too far ahead in the future.
+		    }else{
+			boolean b = hitNote(o);
+			if (b)
+			    break;//only 1 click per note!!
+		    }
+		    
+		}
 	    }
 	}else if(key1used && !key1down){
 	    key1used=false;
 	}//////////////check key2
 	if (key2down && key2used==false){
-	    approachCircles.add(new ApproachCircle(mouseX,mouseY));
 	    key2used=true;
 	    //check first element here
 	    if (objects.size() > 0){
-	        PrintableObject o = objects.get(0);
-		hitNote(o);
+	        //PrintableObject o = objects.get(0);
+	        for (int i=0;i<objects.size();i++){
+		    PrintableObject o = objects.get(i);
+		    if (startTime+o.time>currentTime+5){
+			break;//ignore the beats too far ahead in the future.
+		    }else{
+			boolean b = hitNote(o);
+			if (b)
+			    break;//only 1 click per note!!
+		    }
+		    
+		}
 	    }
 	}else if(key2used && !key2down){
 	    key2used=false;
 	}
 	
-	//do game actions here//
-	for (int i =0;i<approachCircles.size();i++){
-	    ApproachCircle a = approachCircles.get(i);
-	    a.grow();
-	    if (a.getDiameter() > 150){
-		approachCircles.remove(i);
-	    }
-	}
+	//do game actions here
 	if (startTime>0){//if the game has commenced
 	    for (int i=0;i<objects.size();i++){
-		PrintableObject o = objects.get(i);
-		currentTime = System.currentTimeMillis()/1000.0;
-		if (startTime+o.time>currentTime+5){
-		    break;//ignore the beats too far ahead in the future.
-		}
-		if (currentTime-startTime < o.time
-		    && o.time+startTime-currentTime<1){
+		PrintableObject o = objects.get(i);  
+		if (o.time+startTime<1+currentTime){
 		    if (o.transparency<0.9)
 			o.transparency+=0.10;
 		    //x = k-kt x =k @ t=0 and x=0 @ t=1
 		    //or x = k(c-t) where k is the shrink constant
 		    //and c is the time of shrinking.
-		    o.aCircleSize=(int)(150*((startTime+o.time-currentTime))+circleSize);
-		}else if(currentTime+0.25 > startTime+o.time){
+		    o.aCircleSize=(int)(150*(startTime+o.time-currentTime)+circleSize);
+		}
+		if(currentTime - 0.5 > startTime+o.time){
 		    //.25 seconds after you MISSED it...
 		    objects.remove(o);
+		    System.out.println("oops");
 		    //insert X image lol
 		    hitNums.add(new HitNum(o.x,o.y,0));
+		}
+		if (startTime+o.time>currentTime+5){
+		    break;//ignore the beats too far ahead in the future.
 		}
 	        
 	    }
@@ -311,7 +374,7 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 		}
 	    }
 	}
-	    
+	repaint();
 			
     }
 

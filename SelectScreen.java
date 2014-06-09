@@ -126,6 +126,8 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
     }
     //start the music from the middle of the song.
     public void startMusicM(int musicIndex){
+	if (song!=null)
+	    song.close();
 	File dir = listOfSongs[musicIndex];
 	this.musicIndex=musicIndex;
 	File[] listOfObjects = dir.listFiles();
@@ -340,7 +342,7 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 		unselected.x = 800 +Math.abs(300-unselected.y);
 	    }else if(j> musicIndex){
 		ImageObject unselected = selectTabs.get(j).get(0);
-	        unselected.y=currentBeatmap.y+(selectTabs.get(musicIndex).size()-beatmapIndex)*100;
+	        unselected.y=currentBeatmap.y+(selectTabs.get(musicIndex).size()-beatmapIndex+(j-musicIndex-1))*100;
 		unselected.x = 800 + Math.abs(300-unselected.y);
 
 	    }else{
@@ -381,11 +383,10 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
     //this methods assumes you clicked.
     public void interactWithTab(){
 	ImageObject hovered = mouseOver();
+	System.out.println("Interacted with"+hovered);
 	if (hovered!=null){
 	    if (hovered.y == currentBeatmap.y){
-
 		//remember to add a screen after oyu finsih the song!
-		
 		if (song!=null&&!song.player.isComplete())
 		    song.close();
 		w.removePanel(this);
