@@ -38,12 +38,10 @@ public class Playback extends JPanel implements Runnable{
 	imageComponent = new ImageComponent();
 
 	this.setLayout(new OverlayLayout(this));
-
-
 	this.add(imageComponent);
 	this.setVisible(true);
 	//curObj = this;
-	setOpaque(false);
+	setOpaque(true);
     }
     public void run(){
 	startPlayback();
@@ -94,7 +92,7 @@ public class Playback extends JPanel implements Runnable{
 	    
 	}
 	public void setImage() {
-	    //repaint();
+	    repaint();
 	    // SwingUtilities.invokeLater(new ImageRunnable(image));
 	}
 
@@ -105,7 +103,7 @@ public class Playback extends JPanel implements Runnable{
 	    }
 
 	    public void run() {
-		//repaint();
+		repaint();
 	    }
 	}
 

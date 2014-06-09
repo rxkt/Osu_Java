@@ -48,16 +48,19 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     //might replace playback with a videoworker that accepts the dir.
     protected VideoWorker vw;
     protected Thread t1;
-
-
-    public GameBoard(String dir,String filename,int circleSize){
+    protected boolean video;
+    protected boolean closed;
+    public GameBoard(String dir,String filename,int circleSize,boolean video){
 	//set up component, might need more
 	nextLine="";
      	setFocusable(true);
 	setVisible(true);
 	this.dir=dir;
-	setOpaque(true);
-	//setLayout(new BorderLayout());
+	this.video=video;
+	setOpaque(false);
+	closed=false;
+	
+	setLayout(new BorderLayout());
 	addKeyListener(new TAdapter());
 	addMouseListener(new MAdapter());
 	addMouseMotionListener(this);
@@ -176,16 +179,21 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 	System.out.println("Size"+objects.size());
 	timer = new Timer(20,this);
 	timer.start();
-	requestFocusInWindow();
+	//requestFocusInWindow();
 	//set cursor w/ toolkit here
     }
     public void streamMedia(){
 	t1 = new Thread(song);
 	if (videoPath!=null){
 	    System.out.println("This has a video.");
+	    System.out.println(dir+videoPath);
 	    vw = new VideoWorker(this,dir,videoPath);
-	    //add(vw.p);//readd this after testing
-	    //vw.execute();
+	    if (video){
+		add(vw.p);//readd this after testing
+		vw.execute();
+		w.repaint();
+		w.revalidate();
+	    }
 	}
 	t1.start();
 	startTime = System.currentTimeMillis()/1000.0;
@@ -199,7 +207,10 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
     public void paint(Graphics g){
 	super.paint(g);
 	Graphics2D g2d = (Graphics2D)g;
-        bgPanel.paint(g2d);
+	if (!video || videoPath==null){
+	    bgPanel.paint(g2d);
+	    System.out.println("lol no video");
+	}
 	if (startTime > 0){
 	    for (PrintableObject o:objects){
 		
@@ -374,6 +385,15 @@ public class GameBoard extends JPanel implements ActionListener,MouseMotionListe
 		}
 	    }
 	}
+	if (objects.size()==0)
+	    if (song.player.isComplete() && !closed){
+		song.close();
+		w.removePanel(this);
+		w.add(w.screen);
+		w.screen.video=video;
+		w.screen.mode=1;
+		closed=true;
+	    }
 	repaint();
 			
     }

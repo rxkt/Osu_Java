@@ -41,7 +41,7 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 
     //under mouseAdapter
     protected double exitTime;
-    public SelectScreen(boolean video){
+    public SelectScreen(){
 	setFocusable(true);
 	setVisible(true);
 	bgPanel = new Background("default/titleBG.png");
@@ -49,11 +49,12 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 	addMouseListener(new MAdapter());
 	addKeyListener(new TAdapter());
 	addMouseMotionListener(this);
+	video=true;
 	try{
 	    Font font = Font.createFont(Font.TRUETYPE_FONT,new File("default/Exo.ttf"));
 	    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 	    ge.registerFont(font);
-	    font = font.deriveFont(28f);
+	    font = font.deriveFont(14f);
 	    setFont(font);
 	}catch(Exception ex){
 	    ex.printStackTrace();
@@ -367,7 +368,6 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 		String name = file.getName();
 		if (name.contains(".desu")){
 		    maps.add(new ImageObject(800,300,blueTab,name.substring(0,name.length()-5)));
-		    //be sure to switch it to purple if it is selected.
 		    numOfDesuFiles++;
 		}
 	    }
@@ -386,13 +386,12 @@ public class SelectScreen extends JPanel implements ActionListener,MouseMotionLi
 	System.out.println("Interacted with"+hovered);
 	if (hovered!=null){
 	    if (hovered.y == currentBeatmap.y){
-		//remember to add a screen after oyu finsih the song!
 		if (song!=null&&!song.player.isComplete())
 		    song.close();
 		w.removePanel(this);
 		try{
 		    Thread.sleep(3000);
-		    w.addPanel(currentSongDir.getPath()+"\\",currentBeatmap.data+".desu",70);
+		    w.addPanel(currentSongDir.getPath()+"\\",currentBeatmap.data+".desu",70,video);
 		}catch(Exception ex){
 		    ex.printStackTrace();
 		}
